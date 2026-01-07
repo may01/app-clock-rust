@@ -47,6 +47,7 @@ ledger_device_sdk::set_panic!(ledger_device_sdk::exiting_panic);
 
 // Required for using String, Vec, format!...
 extern crate alloc;
+use alloc::format;
 
 use ledger_device_sdk::nbgl::{NbglReviewStatus, StatusType};
 
@@ -159,23 +160,29 @@ extern "C" fn sample_main() {
 
     let mut tx_ctx = TxContext::new();
 
-    tx_ctx.home = ui_menu_main(&mut comm);
-    tx_ctx.home.show_and_return();
-
+    let mut loop_count: i32 = 0;
+    let mut status = true;
     loop {
-        let ins: Instruction = comm.next_command();
+        
+        // let ins: Instruction = comm.next_command();
 
-        let _status = match handle_apdu(&mut comm, &ins, &mut tx_ctx) {
-            Ok(()) => {
-                comm.reply_ok();
-                AppSW::Ok
-            }
-            Err(sw) => {
-                comm.reply(sw);
-                sw
-            }
-        };
-        show_status_and_home_if_needed(&ins, &mut tx_ctx, &_status);
+        // let _status = match handle_apdu(&mut comm, &ins, &mut tx_ctx) {
+        //     Ok(()) => {
+        //         comm.reply_ok();
+        //         AppSW::Ok
+        //     }
+        //     Err(sw) => {
+        //         comm.reply(sw);
+        //         sw
+        //     }
+        // };        
+        let msg = format!("Hello, time: {:?}!", loop_count);
+        NbglReviewStatus::new().show(status);
+        status = !status;        
+        while loop_count < 75 {
+            comm.next_event::<ApduHeader>();
+            loop_count += 1;        
+        }
     }
 }
 
