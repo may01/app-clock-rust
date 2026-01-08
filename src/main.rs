@@ -223,7 +223,7 @@ extern "C" fn sample_main() {
             let mut icoM1 = get_glyph(minutes / 10);
             let mut icoM2 = get_glyph(minutes % 10);
             NbglClock::new().show(status, icoH1, icoH2, icoM1, icoM2);
-            comm.next_event::<ApduHeader>();
+            //comm.next_event::<ApduHeader>();
             loop_count += 1;        
             minutes += 1;
             if minutes >= 60 {
