@@ -23,6 +23,7 @@ mod app_ui {
     pub mod address;
     pub mod menu;
     pub mod sign;
+    //pub mod nbgl_clock;
 }
 mod handlers {
     pub mod get_public_key;
@@ -33,6 +34,7 @@ mod handlers {
 mod settings;
 
 use app_ui::menu::ui_menu_main;
+//use app_ui::nbgl_clock::NbglClock;
 use handlers::{
     get_public_key::handler_get_public_key,
     get_version::handler_get_version,
@@ -47,9 +49,12 @@ ledger_device_sdk::set_panic!(ledger_device_sdk::exiting_panic);
 
 // Required for using String, Vec, format!...
 extern crate alloc;
+use alloc::format;
 
 use ledger_device_sdk::nbgl::{NbglReviewStatus, StatusType};
-
+use ledger_device_sdk::nbgl::nbgl_clock::NbglClock;
+use ledger_device_sdk::nbgl::NbglGlyph;
+use ledger_device_sdk::include_gif;
 // P2 for last APDU to receive.
 const P2_SIGN_TX_LAST: u8 = 0x00;
 // P2 for more APDU to receive.
@@ -159,23 +164,96 @@ extern "C" fn sample_main() {
 
     let mut tx_ctx = TxContext::new();
 
-    tx_ctx.home = ui_menu_main(&mut comm);
-    tx_ctx.home.show_and_return();
-
+    let mut loop_count: i32 = 0;
+    let mut status = true;
     loop {
-        let ins: Instruction = comm.next_command();
+        
+        // let ins: Instruction = comm.next_command();
 
-        let _status = match handle_apdu(&mut comm, &ins, &mut tx_ctx) {
-            Ok(()) => {
-                comm.reply_ok();
-                AppSW::Ok
-            }
-            Err(sw) => {
-                comm.reply(sw);
-                sw
+        // let _status = match handle_apdu(&mut comm, &ins, &mut tx_ctx) {
+        //     Ok(()) => {
+        //         comm.reply_ok();
+        //         AppSW::Ok
+        //     }
+        //     Err(sw) => {
+        //         comm.reply(sw);
+        //         sw
+        //     }
+        // };        
+        let msg = format!("Hello, time: {:?}!", loop_count);
+        //#[cfg(any(target_os = "stax", target_os = "flex"))]
+
+        
+        const ZERO: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/0.gif", NBGL));
+        const ONE: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/1.gif", NBGL));
+        const TWO: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/2.gif", NBGL));
+        const THREE: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/3.gif", NBGL));
+        const FOUR: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/4.gif", NBGL));
+        const FIVE: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/5.gif", NBGL));
+        const SIX: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/6.gif", NBGL));
+        const SEVEN: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/7.gif", NBGL));
+        const EIGHT: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/8.gif", NBGL));
+        const NINE: NbglGlyph = NbglGlyph::from_include(include_gif!("glyphs/9.gif", NBGL));
+        
+        let  get_glyph = | number: i32 | {
+            match number {
+                0 => &ZERO,
+                1 => &ONE,
+                2 => &TWO,
+                3 => &THREE,
+                4 => &FOUR,
+                5 => &FIVE,
+                6 => &SIX,
+                7 => &SEVEN,
+                8 => &EIGHT,
+                9 => &NINE,
+                _ => &ZERO,
             }
         };
-        show_status_and_home_if_needed(&ins, &mut tx_ctx, &_status);
+        let mut minutes: i32 = 5;
+        let mut hours: i32 = 15; 
+
+        
+
+        
+        status = !status;        
+        loop {
+            let mut icoH1 = get_glyph(hours / 10);
+            let mut icoH2 = get_glyph(hours % 10);
+            let mut icoM1 = get_glyph(minutes / 10);
+            let mut icoM2 = get_glyph(minutes % 10);
+            NbglClock::new().show(status, icoH1, icoH2, icoM1, icoM2);
+            //comm.next_event::<ApduHeader>();
+            loop_count += 1;        
+            minutes += 1;
+            if minutes >= 60 {
+                minutes = 0;
+                hours += 1;
+                if hours >= 24 {
+                    hours = 0;
+                }
+            }
+            // match self.ux_sync_wait(true) {
+            //         SyncNbgl::UxSyncRetApduReceived => {
+            //             if let Some(hdr) = nbgl_fetch_apdu_header() {
+            //                 // Reconstruct minimal Event::Command using APDU header only.
+            //                 // The generic parameter T: TryFrom<ApduHeader> will parse header.
+            //                 if let Ok(ins) = T::try_from(hdr) {
+            //                     return Event::Command(ins);
+            //                 } else {
+            //                     // In case of parse error we emulate a BadIns reply.
+            //                     nbgl_reply_status(Reply(StatusWords::BadIns as u16));
+            //                 }
+            //             }
+            //         }
+            //         SyncNbgl::UxSyncRetQuitted => {
+            //             exit_app(0);
+            //         }
+            //         _ => {
+            //             panic!("Unexpected return value from ux_sync_homeAndSettings");
+            //         }
+            //     }
+        }
     }
 }
 

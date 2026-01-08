@@ -1,11 +1,11 @@
 [package]
-name = "app-boilerplate-rust"
+name = "app-clock-rust"
 version = "1.7.7"
 authors = ["Ledger"]
 edition = "2021"
 
 [dependencies]
-ledger_device_sdk = "1.*"
+ledger_device_sdk = { path = "../rust-sdk/ledger-device-rust-sdk/ledger_device_sdk" }
 serde = { version="1.0.192", default-features = false, features = ["derive"] }
 serde-json-core = "0.6.0"
 hex = { version = "0.4.3", default-features = false, features = ["serde", "alloc"] }
@@ -22,7 +22,7 @@ debug = ["ledger_device_sdk/debug"]
 curve = ["secp256k1"]
 flags = "0"
 path = ["44'/1'"]
-name = "Rust Boilerplate"
+name = "Clock"
 
 [package.metadata.ledger.nanox]
 icon = "icons/crab_14x14.gif"
@@ -34,7 +34,7 @@ icon = "icons/crab_14x14.gif"
 icon = "icons/crab_32x32.gif"
 
 [package.metadata.ledger.flex]
-icon = "icons/crab_40x40.gif"
+icon = "icons/clock.gif"
 
 [package.metadata.ledger.apex_p]
 icon = "icons/crab_32x32.png"
